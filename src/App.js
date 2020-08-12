@@ -6,7 +6,10 @@ class App extends Component {
   render(){
     return (
       <div className="App">
-        <TodoItem/>
+        <h2>List Item</h2>
+        <TodoItem title="Mua bánh"/>
+        <TodoItem title="Mua kẹo"/>
+        <TodoItem title="Mua nước ngọt"/>
       </div>
     );
   }
