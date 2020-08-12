@@ -7,9 +7,9 @@ class App extends Component {
     super();
 
     this.todoItems = [
-      { title: 'Mua bánh', isComplete: true },
-      { title: 'Mua kẹo', isComplete: true  },
-      { title: 'Mua nước ngọt' }
+      // { title: 'Mua bánh', isComplete: true },
+      // { title: 'Mua kẹo', isComplete: true  },
+      // { title: 'Mua nước ngọt' }
     ];
   }
 
@@ -18,9 +18,12 @@ class App extends Component {
       <div className="App">
         <h2>List Item</h2>
         {
-          this.todoItems.map((item, index) =>
+          this.todoItems.length > 0 && this.todoItems.map((item, index) =>
           <TodoItem key={index} item={item}/>
           )
+        }
+        {
+          this.todoItems.length === 0 && 'Nothing here'
         }
       </div>
     );
