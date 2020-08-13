@@ -1,22 +1,24 @@
-import React, { Component } from 'react';
-import './App.css';
-import TodoItem from './components/TodoItem';
+import React, { Component } from "react";
+import "./App.css";
+import TodoItem from "./components/TodoItem";
+import checkImg from "./img/check.svg";
+import checkCompleteImg from "./img/check-complete.svg";
 
 class App extends Component {
-  constructor(){
+  constructor() {
     super();
     this.state = {
-        todoItems: [
-        { title: 'Mua bánh', isComplete: true },
-        { title: 'Mua kẹo', isComplete: true  },
-        { title: 'Mua nước ngọt' }
-      ]
+      allChecked: false,
+      newItem: "",
+      todoItems: [],
     };
+
+    this.onKeyUp = this.onKeyUp.bind(this);
+    this.onChange = this.onChange.bind(this);
   }
 
-  onItemClicked(item){
+  onItemClicked(item) {
     return (event) => {
-      console.log(item);
       const isComplete = item.isComplete;
       const { todoItems } = this.state;
       const index = todoItems.indexOf(item);
@@ -26,35 +28,90 @@ class App extends Component {
           ...todoItems.slice(0, index),
           {
             ...item,
-            isComplete: !isComplete
+            isComplete: !isComplete,
           },
-          ...todoItems.slice(index + 1)
-        ]
+          ...todoItems.slice(index + 1),
+        ],
       });
     };
   }
 
-  render(){
-    const { todoItems } = this.state;
-    if (todoItems.length){
+  onKeyUp(event) {
+    if (event.keyCode === 13) {
+      let text = event.target.value;
+      if (!text) {
+        return;
+      }
+      text = text.trim();
+      if (!text) {
+        return;
+      }
+
+      this.setState({
+        newItem: "",
+        todoItems: [
+          { title: text, isComplete: false },
+          ...this.state.todoItems,
+        ],
+      });
+    }
+  }
+
+  onChange(event) {
+    this.setState({
+      newItem: event.target.value,
+    });
+  }
+
+  render() {
+    const { todoItems, newItem } = this.state;
+    if (todoItems.length) {
+      let url = checkImg;
+      if (todoItems.isComplete) {
+        url = checkCompleteImg;
+      }
       return (
         <div className="App">
-          <p id="header">Todo List</p>
-          {
-            todoItems.length && todoItems.map((item, index) =>
-            <TodoItem key={index} 
-                      item={item} 
-                      onClick={this.onItemClicked(item)}/>
-            )
-          } 
+          <p id="appname">Todo List</p>
+          <div className="header">
+            <img src={url} 
+                 width={32}
+                 alt="check">
+            </img>
+            <input
+              type="text"
+              placeholder="Add a new item"
+              value={newItem}
+              onChange={this.onChange}
+              onKeyUp={this.onKeyUp}
+            ></input>
+          </div>
+          {todoItems.length &&
+            todoItems.map((item, index) => (
+              <TodoItem
+                key={index}
+                item={item}
+                onClick={this.onItemClicked(item)}
+              />
+            ))}
         </div>
       );
     } else {
-      return(
+      return (
         <div className="App">
-          <p id="header">Todo List</p>
+          <p id="appname">Todo List</p>
+          <div className="header">
+            <img src={checkImg} width={32} alt="check"></img>
+            <input
+              type="text"
+              placeholder="Add a new item"
+              value={newItem}
+              onChange={this.onChange}
+              onKeyUp={this.onKeyUp}
+            ></input>
+          </div>
           <p id="nothing">Nothing here!</p>
-        </div> 
+        </div>
       );
     }
   }
