@@ -1,0 +1,43 @@
+import React, { memo, useState } from 'react'
+import checkAllImg from '../img/check-complete.svg';
+
+const Header = memo((props) => {
+    const [text, setText] = useState('')
+    const { addTodo, checkAll, isCheckedAll } = props
+
+    const onAddTodo = (event) => {
+        if (event.key === 'Enter' && text) {
+            addTodo({
+                id: new Date().valueOf(),
+                text,
+                isCompleted: false
+            })
+            setText('')
+        }
+    }
+
+    return (
+        <header className="header">
+            <p>Todo List</p>
+            <input
+                className="toggle-all"
+                type="checkbox"
+                onChange={() => {
+                    checkAll()
+                }}
+                checked={isCheckedAll}
+            />
+            <img src={checkAllImg} width={32} htmlFor="toggle-all" onClick={checkAll} ></img>
+            <input
+                className="new-todo"
+                placeholder="Add a new item"
+                value={text}
+                onChange={(e) => setText(e.target.value)}
+                onKeyPress={onAddTodo}
+            />
+
+        </header>
+    )
+})
+
+export default Header;

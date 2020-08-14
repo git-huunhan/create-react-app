@@ -1,119 +1,120 @@
-import React, { Component } from "react";
-import "./App.css";
-import TodoItem from "./components/TodoItem";
-import checkImg from "./img/check.svg";
-import checkCompleteImg from "./img/check-complete.svg";
+import React, { PureComponent } from 'react';
+import TodoList from './components/TodoList'
+import Header from './components/Header'
+import Footer from './components/Footer'
 
-class App extends Component {
-  constructor() {
-    super();
-    this.state = {
-      allChecked: false,
-      newItem: "",
-      todoItems: [],
-    };
+import './css/Todo.css'
 
-    this.onKeyUp = this.onKeyUp.bind(this);
-    this.onChange = this.onChange.bind(this);
+const filterByStatus = (listTodos = [], status = '', id) => {
+  switch (status) {
+    case 'ACTIVE':
+      return listTodos.filter(item => !item.isCompleted)
+    case 'COMPLETED':
+      return listTodos.filter(item => item.isCompleted)
+    case 'REMOVE':
+      return listTodos.filter(item => item.id !== id)
+    default:
+      return listTodos
+  }
+}
+
+const filterTodosLeft = (listTodos = []) => {
+  return listTodos.filter(item => !item.isCompleted)
+}
+
+class App extends PureComponent {
+  state = {
+    listTodos: [],
+    isCheckedAll: false,
+    status: 'ALL',
+    todoEditingId: ''
   }
 
-  onItemClicked(item) {
-    return (event) => {
-      const isComplete = item.isComplete;
-      const { todoItems } = this.state;
-      const index = todoItems.indexOf(item);
-
-      this.setState({
-        todoItems: [
-          ...todoItems.slice(0, index),
-          {
-            ...item,
-            isComplete: !isComplete,
-          },
-          ...todoItems.slice(index + 1),
-        ],
-      });
-    };
+  addTodos = (todo = {}) => {
+    this.setState(preState => ({
+      listTodos: [todo, ...preState.listTodos]
+    }))
   }
 
-  onKeyUp(event) {
-    if (event.keyCode === 13) {
-      let text = event.target.value;
-      if (!text) {
-        return;
+  markCompleted = (id = '') => {
+    const { listTodos } = this.state
+    let isCheckedAll = true
+    const updatedListTodos = listTodos.map(item => {
+      if ((!item.isCompleted && item.id !== id) || (item.isCompleted && item.id === id)) {
+        isCheckedAll = false
       }
-      text = text.trim();
-      if (!text) {
-        return;
+      if (item.id === id) {
+        return { ...item, isCompleted: !item.isCompleted }
       }
-
-      this.setState({
-        newItem: "",
-        todoItems: [
-          { title: text, isComplete: false },
-          ...this.state.todoItems,
-        ],
-      });
-    }
-  }
-
-  onChange(event) {
+      return item
+    })
     this.setState({
-      newItem: event.target.value,
-    });
+      isCheckedAll,
+      listTodos: updatedListTodos
+    })
+  }
+
+  checkAll = () => {
+    const { listTodos, isCheckedAll } = this.state
+    const updatedListTodos = listTodos.map(item => ({ ...item, isCompleted: !isCheckedAll }))
+    this.setState(preState => ({
+      isCheckedAll: !preState.isCheckedAll,
+      listTodos: updatedListTodos
+    }))
+  }
+
+  clearCompleted = () => {
+    this.setState(preState => ({
+      listTodos: filterTodosLeft(preState.listTodos)
+    }))
+  }
+
+  getEditTodo = (id = '') => {
+    this.setState({
+      todoEditingId: id
+    })
+  }
+
+  editTodo = (todo, index) => {
+    const { listTodos } = this.state
+    listTodos.splice(index, 1, todo)
+    this.setState({ listTodos })
+  }
+
+  removeTodo = (id = '') => {
+    this.setState(prevState => ({
+      listTodos: filterByStatus(prevState.listTodos, 'REMOVE', id)
+    }))
   }
 
   render() {
-    const { todoItems, newItem } = this.state;
-    if (todoItems.length) {
-      let url = checkImg;
-      if (todoItems.isComplete) {
-        url = checkCompleteImg;
-      }
-      return (
-        <div className="App">
-          <p id="appname">Todo List</p>
-          <div className="header">
-            <img src={url} 
-                 width={32}
-                 alt="check">
-            </img>
-            <input
-              type="text"
-              placeholder="Add a new item"
-              value={newItem}
-              onChange={this.onChange}
-              onKeyUp={this.onKeyUp}
-            ></input>
-          </div>
-          {todoItems.length &&
-            todoItems.map((item, index) => (
-              <TodoItem
-                key={index}
-                item={item}
-                onClick={this.onItemClicked(item)}
-              />
-            ))}
-        </div>
-      );
-    } else {
-      return (
-        <div className="App">
-          <p id="appname">Todo List</p>
-          <div className="header">
-            <img src={checkImg} width={32} alt="check"></img>
-            <input
-              type="text"
-              placeholder="Add a new item"
-              value={newItem}
-              onChange={this.onChange}
-              onKeyUp={this.onKeyUp}
-            ></input>
-          </div>
-          <p id="nothing">Nothing here!</p>
-        </div>
-      );
-    }
+    const { listTodos, isCheckedAll, status, todoEditingId } = this.state
+    return (
+      <div className="todoapp">
+        <Header
+          checkAll={this.checkAll}
+          isCheckedAll={isCheckedAll}
+          addTodo={this.addTodos}
+        />
+        <TodoList
+          listTodos={filterByStatus(listTodos, status)}
+          markCompleted={this.markCompleted}
+          
+          todoEditingId={todoEditingId}
+          getEditTodo={this.getEditTodo}
+          editTodo={this.editTodo}
+          removeTodo={this.removeTodo}
+        />
+        <Footer
+          activeButton={status}
+          setStatusFilter={(status) => this.setState({ status })}
+          clearCompleted={this.clearCompleted}
+          numOfTodosLeft={filterTodosLeft(listTodos).length}
+          numOfTodos={listTodos.length}
+        />
+      </div>
+    );
+
   }
 }
 
