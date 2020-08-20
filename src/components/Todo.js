@@ -32,7 +32,7 @@ const Todo = memo(props => {
                             checked={todo.isCompleted}
                             onChange={() => markCompleted(todo.id)}
                         />
-                        <label onDoubleClick={() => getEditTodo(todo.id)}>{todo.text}</label>
+                        <label onClick={() => getEditTodo(todo.id)}>{todo.text}</label>
                         <img src={removeImg} width={32} className="destroy" onClick={() => removeTodo(todo.id)} />
                     </div> :
                     <input
